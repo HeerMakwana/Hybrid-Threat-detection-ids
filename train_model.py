@@ -875,7 +875,7 @@ def main() -> None:
                         help="Label column name (auto-detected if omitted)")
     parser.add_argument("--max-rows", type=int, default=None,
                         help="Cap rows via stratified sampling (e.g. 500000 for a quick run)")
-    parser.add_argument("--out",      default="merged_ids/models/final_model.joblib",
+    parser.add_argument("--out",      default="models/final_model.joblib",
                         help="Output path for the joblib model artifact")
     parser.add_argument("--gpu",      action="store_true",
                         help="Enable GPU training for LightGBM boosters (requires LightGBM + CUDA)")

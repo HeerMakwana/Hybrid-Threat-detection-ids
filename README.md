@@ -165,7 +165,7 @@ See `data/README.md` for details.
 ## File Structure
 
 ```
-merged_ids/
+Hybrid-Threat-detection-ids/
 ├── train_model.py              # Main training pipeline
 ├── feature_extractor.py        # CICIDS feature definitions
 ├── simulation.py               # Inference script
