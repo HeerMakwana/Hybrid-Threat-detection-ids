@@ -139,5 +139,5 @@ temp/
 *.bak
 
 # Keep small example data for testing
-!data/simulation_data.csv
-!data/train_sample.csv
+data/simulation_data.csv
+data/train_sample.csv
