@@ -1,0 +1,42 @@
+{
+  "model_architecture": "5-estimator hybrid soft-voting ensemble",
+  "estimators": [
+    "lgbm_fast",
+    "lgbm_deep",
+    "rf",
+    "et",
+    "sgd_cal"
+  ],
+  "boosting_backend": "lightgbm",
+  "gpu_training": false,
+  "voting_method": "soft",
+  "weights": [
+    4.0,
+    3.0,
+    1.5,
+    1.0,
+    0.8
+  ],
+  "rows_total": 2830743,
+  "train_rows": 2264594,
+  "validation_rows": 566149,
+  "class_balance_attack_pct": 19.7,
+  "accuracy": 0.9814942709428084,
+  "precision": 0.9254821052631579,
+  "recall": 0.9854028996942499,
+  "f1_score": 0.9545030159067913,
+  "false_positive_rate": 0.01946460780432009,
+  "roc_auc": 0.998421992553947,
+  "threshold": 0.20999999344348907,
+  "threshold_optimisation": "recall*0.60 + F1*0.30 - FP_rate*0.10",
+  "confusion_matrix": {
+    "tn": 445771,
+    "fp": 8849,
+    "fn": 1628,
+    "tp": 109901
+  },
+  "anomalies_in_validation": 111529,
+  "anomalies_detected": 109901,
+  "false_alarms": 8849,
+  "training_time_seconds": 237.4
+}
