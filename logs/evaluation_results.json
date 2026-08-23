@@ -1,0 +1,17 @@
+{
+  "rows_used": 2830743,
+  "validation_rows": 566149,
+  "accuracy": 0.9845040793148093,
+  "precision": 0.9491162432909667,
+  "recall": 0.9735315478485417,
+  "f1_score": 0.9611688731315867,
+  "false_positive_rate": 0.012804100127579076,
+  "roc_auc": 0.9985043654635688,
+  "threshold": 0.5,
+  "confusion_matrix": {
+    "tn": 448799,
+    "fp": 5821,
+    "fn": 2952,
+    "tp": 108577
+  }
+}

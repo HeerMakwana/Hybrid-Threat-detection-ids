@@ -1,0 +1,16 @@
+{
+  "total_records": 500,
+  "threshold": 0.21,
+  "confusion_matrix": {
+    "TN": 398,
+    "FP": 7,
+    "FN": 0,
+    "TP": 95
+  },
+  "precision": 0.9405940594059405,
+  "recall": 0.9895833333333334,
+  "f1_score": 0.9644670050761421,
+  "accuracy": 0.986,
+  "false_positive_rate": 0.01485148514851485,
+  "specificity": 0.9851485148514851
+}
