@@ -1,0 +1,174 @@
+(.venv312) PS D:\projects\Hybrid-Threat-detection-ids-main> python -c "import sklearn, scipy, numpy, lightgbm, joblib; print('sklearn:', sklearn.__version__); print('scipy:', scipy.__version__); print('numpy:', numpy.__version__); print('lightgbm:', lightgbm.__version__); print('joblib:', joblib.__version__)"
+sklearn: 1.9.0
+scipy: 1.18.1
+numpy: 2.5.2
+lightgbm: 4.7.0
+joblib: 1.5.3
+(.venv312) PS D:\projects\Hybrid-Threat-detection-ids-main> python -c "from model_loader import load_model_artifact; a=load_model_artifact('models/final_model.joblib'); print('MODEL LOADED SUCCESSFULLY'); print('MODEL TYPE:', a['model_type']); print('FEATURES:', len(a['feature_columns'])); print('THRESHOLD:', a['threshold'])"
+MODEL LOADED SUCCESSFULLY
+MODEL TYPE: hybrid_voting_5ensemble_v3
+FEATURES: 17
+THRESHOLD: 0.20999999344348907
+(.venv312) PS D:\projects\Hybrid-Threat-detection-ids-main> python -m pytest -q
+......................                                                                          [100%]
+========================================== warnings summary ==========================================
+tests/test_model_loader.py: 1242 warnings
+  D:\projects\Hybrid-Threat-detection-ids-main\.venv312\Lib\site-packages\joblib\numpy_pickle.py:207: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
+  As an alternative, you can create a new view using np.reshape (with copy=False if needed).
+    array.shape = self.shape
+
+tests/test_part2_assessment.py::test_complete_mocked_simulation_enriched_jsonl
+  D:\projects\Hybrid-Threat-detection-ids-main\simulation.py:147: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "alert_id": f"sim-alert-{idx}-{int(datetime.utcnow().timestamp())}",
+
+tests/test_part2_assessment.py::test_complete_mocked_simulation_enriched_jsonl
+  D:\projects\Hybrid-Threat-detection-ids-main\simulation.py:148: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat() + "Z",
+
+tests/test_part2_assessment.py::test_complete_mocked_simulation_enriched_jsonl
+  D:\projects\Hybrid-Threat-detection-ids-main\simulation.py:191: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat() + "Z",
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+22 passed, 1245 warnings in 2.65s
+(.venv312) PS D:\projects\Hybrid-Threat-detection-ids-main> python simulation.py
+Loading model: models/final_model.joblib
+Model type: hybrid_voting_5ensemble_v3
+Detection threshold: 0.2100
+Loading simulation data: data/simulation_data.csv
+Loaded 500 records from simulation data
+Features scaled: shape (500, 17)
+Predictions complete
+D:\projects\Hybrid-Threat-detection-ids-main\simulation.py:147: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "alert_id": f"sim-alert-{idx}-{int(datetime.utcnow().timestamp())}",
+D:\projects\Hybrid-Threat-detection-ids-main\simulation.py:148: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "timestamp": datetime.utcnow().isoformat() + "Z",
+ALERT [2]: Anomaly detected with confidence 0.9999
+ALERT [10]: Anomaly detected with confidence 0.8930
+ALERT [13]: Anomaly detected with confidence 0.9574
+ALERT [18]: Anomaly detected with confidence 1.0000
+ALERT [26]: Anomaly detected with confidence 1.0000
+ALERT [28]: Anomaly detected with confidence 1.0000
+ALERT [37]: Anomaly detected with confidence 0.9990
+ALERT [42]: Anomaly detected with confidence 0.9495
+ALERT [43]: Anomaly detected with confidence 0.9520
+ALERT [46]: Anomaly detected with confidence 0.5106
+ALERT [52]: Anomaly detected with confidence 0.8139
+ALERT [60]: Anomaly detected with confidence 0.9532
+ALERT [63]: Anomaly detected with confidence 0.9618
+ALERT [68]: Anomaly detected with confidence 0.9999
+ALERT [73]: Anomaly detected with confidence 0.9999
+ALERT [78]: Anomaly detected with confidence 1.0000
+ALERT [81]: Anomaly detected with confidence 0.9385
+ALERT [87]: Anomaly detected with confidence 0.9767
+ALERT [89]: Anomaly detected with confidence 1.0000
+ALERT [97]: Anomaly detected with confidence 0.5106
+ALERT [102]: Anomaly detected with confidence 0.9414
+ALERT [109]: Anomaly detected with confidence 0.5106
+ALERT [110]: Anomaly detected with confidence 0.9999
+ALERT [115]: Anomaly detected with confidence 0.8626
+ALERT [121]: Anomaly detected with confidence 0.9630
+ALERT [123]: Anomaly detected with confidence 0.9999
+ALERT [129]: Anomaly detected with confidence 0.9999
+ALERT [137]: Anomaly detected with confidence 0.9233
+ALERT [143]: Anomaly detected with confidence 0.9345
+ALERT [151]: Anomaly detected with confidence 0.9416
+ALERT [159]: Anomaly detected with confidence 0.5106
+ALERT [170]: Anomaly detected with confidence 0.5106
+ALERT [184]: Anomaly detected with confidence 0.9532
+ALERT [191]: Anomaly detected with confidence 1.0000
+ALERT [195]: Anomaly detected with confidence 1.0000
+ALERT [200]: Anomaly detected with confidence 0.9999
+ALERT [208]: Anomaly detected with confidence 0.9384
+ALERT [216]: Anomaly detected with confidence 0.9999
+ALERT [217]: Anomaly detected with confidence 0.9500
+ALERT [218]: Anomaly detected with confidence 1.0000
+ALERT [236]: Anomaly detected with confidence 0.9745
+ALERT [242]: Anomaly detected with confidence 0.9629
+ALERT [246]: Anomaly detected with confidence 1.0000
+ALERT [248]: Anomaly detected with confidence 0.9999
+ALERT [249]: Anomaly detected with confidence 0.8819
+ALERT [251]: Anomaly detected with confidence 0.5802
+ALERT [255]: Anomaly detected with confidence 0.8671
+ALERT [259]: Anomaly detected with confidence 0.5106
+ALERT [262]: Anomaly detected with confidence 0.9621
+ALERT [269]: Anomaly detected with confidence 0.9632
+ALERT [274]: Anomaly detected with confidence 0.9459
+ALERT [277]: Anomaly detected with confidence 0.9464
+ALERT [281]: Anomaly detected with confidence 0.9530
+ALERT [283]: Anomaly detected with confidence 0.9302
+ALERT [289]: Anomaly detected with confidence 0.9414
+ALERT [290]: Anomaly detected with confidence 1.0000
+ALERT [291]: Anomaly detected with confidence 0.9530
+ALERT [292]: Anomaly detected with confidence 0.8433
+ALERT [294]: Anomaly detected with confidence 0.9990
+ALERT [299]: Anomaly detected with confidence 0.9385
+ALERT [303]: Anomaly detected with confidence 0.9545
+ALERT [309]: Anomaly detected with confidence 0.9422
+ALERT [310]: Anomaly detected with confidence 0.9495
+ALERT [315]: Anomaly detected with confidence 0.9580
+ALERT [319]: Anomaly detected with confidence 0.9630
+ALERT [324]: Anomaly detected with confidence 0.9638
+ALERT [327]: Anomaly detected with confidence 0.9999
+ALERT [338]: Anomaly detected with confidence 0.9577
+ALERT [353]: Anomaly detected with confidence 0.7829
+ALERT [354]: Anomaly detected with confidence 0.8990
+ALERT [359]: Anomaly detected with confidence 0.9493
+ALERT [376]: Anomaly detected with confidence 0.9424
+ALERT [379]: Anomaly detected with confidence 0.9543
+ALERT [383]: Anomaly detected with confidence 0.7191
+ALERT [390]: Anomaly detected with confidence 0.9520
+ALERT [393]: Anomaly detected with confidence 0.9999
+ALERT [394]: Anomaly detected with confidence 0.9262
+ALERT [397]: Anomaly detected with confidence 0.9955
+ALERT [398]: Anomaly detected with confidence 0.9625
+ALERT [399]: Anomaly detected with confidence 0.9626
+ALERT [401]: Anomaly detected with confidence 0.8750
+ALERT [407]: Anomaly detected with confidence 0.9062
+ALERT [408]: Anomaly detected with confidence 0.9457
+ALERT [409]: Anomaly detected with confidence 0.9990
+ALERT [412]: Anomaly detected with confidence 0.7180
+ALERT [414]: Anomaly detected with confidence 0.8518
+ALERT [415]: Anomaly detected with confidence 0.9999
+ALERT [416]: Anomaly detected with confidence 0.5802
+ALERT [421]: Anomaly detected with confidence 0.9955
+ALERT [427]: Anomaly detected with confidence 0.9418
+ALERT [429]: Anomaly detected with confidence 0.5106
+ALERT [430]: Anomaly detected with confidence 0.9627
+ALERT [442]: Anomaly detected with confidence 0.9628
+ALERT [443]: Anomaly detected with confidence 1.0000
+ALERT [445]: Anomaly detected with confidence 0.9576
+ALERT [460]: Anomaly detected with confidence 0.9640
+ALERT [469]: Anomaly detected with confidence 0.9990
+ALERT [482]: Anomaly detected with confidence 1.0000
+ALERT [484]: Anomaly detected with confidence 0.5106
+ALERT [486]: Anomaly detected with confidence 0.9543
+ALERT [494]: Anomaly detected with confidence 0.9999
+
+============================================================
+SIMULATION SUMMARY
+============================================================
+Total records processed: 500
+Benign records: 399
+Anomalies detected: 101
+Detection rate: 20.20%
+Alerts written to: logs/simulation_alerts.jsonl
+============================================================
+
+D:\projects\Hybrid-Threat-detection-ids-main\simulation.py:191: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "timestamp": datetime.utcnow().isoformat() + "Z",
+Saved results to: logs\simulation_results.json
+(.venv312) PS D:\projects\Hybrid-Threat-detection-ids-main> Get-Content logs\simulation_alerts.jsonl -TotalCount 3
+{"alert_id": "sim-alert-2-1787613019", "timestamp": "2026-08-25T04:40:19.861275Z", "record_index": 2, "predicted_label": "ANOMALY", "confidence": 0.999901219236848, "threshold": 0.20999999344348907, "model_type": "hybrid_voting_5ensemble_v3", "source_ip": null, "destination_ip": null, "source_port": null, "destination_port": 80, "protocol": null, "threat_intelligence": {}, "ioc_matches": [], "threat_confidence": {"score": 0.35, "severity": "MEDIUM", "factors": ["ML confidence: 1.00"]}}
+{"alert_id": "sim-alert-10-1787613019", "timestamp": "2026-08-25T04:40:19.862274Z", "record_index": 10, "predicted_label": "ANOMALY", "confidence": 0.8929578495729793, "threshold": 0.20999999344348907, "model_type": "hybrid_voting_5ensemble_v3", "source_ip": null, "destination_ip": null, "source_port": null, "destination_port": 80, "protocol": null, "threat_intelligence": {}, "ioc_matches": [], "threat_confidence": {"score": 0.3125, "severity": "MEDIUM", "factors": ["ML confidence: 0.89"]}}
+{"alert_id": "sim-alert-13-1787613019", "timestamp": "2026-08-25T04:40:19.862274Z", "record_index": 13, "predicted_label": "ANOMALY", "confidence": 0.9573753203242329, "threshold": 0.20999999344348907, "model_type": "hybrid_voting_5ensemble_v3", "source_ip": null, "destination_ip": null, "source_port": null, "destination_port": 80, "protocol": null, "threat_intelligence": {}, "ioc_matches": [], "threat_confidence": {"score": 0.3351, "severity": "MEDIUM", "factors": ["ML confidence: 0.96"]}}
+(.venv312) PS D:\projects\Hybrid-Threat-detection-ids-main> 
+
+
+
+
+
+
+
+
+

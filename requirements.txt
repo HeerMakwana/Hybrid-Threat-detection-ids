@@ -1,0 +1,11 @@
+pandas
+numpy
+scikit-learn==1.9.0
+imbalanced-learn
+joblib==1.5.3
+pyshark
+xgboost
+lightgbm==4.7.0
+catboost
+requests
+pytest
