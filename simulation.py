@@ -14,7 +14,10 @@ from threat_intelligence.assessment import IOCMatcher, assess_threat
 from threat_intelligence.opencti import OpenCTIProvider
 from threat_intelligence.otx import OTXProvider
 from threat_intelligence.virustotal import VirusTotalProvider
-
+from siem.wazuh_forwarder import (
+    WazuhForwarder,
+    WazuhForwardingError,
+)
 
 FEATURE_ALIASES = {
     "flow duration": "Flow Duration",
@@ -96,7 +99,7 @@ def align_cicids_columns(df, feature_columns):
     return aligned
 
 
-def run_simulation(model_path, data_path, alert_file, threshold=None, threat_intel_service=None):
+def run_simulation(model_path, data_path, alert_file, threshold=None, threat_intel_service=None,wazuh_forwarder=None,):
     print(f"Loading model: {model_path}", flush=True)
     artifact = load_model_artifact(model_path)
     model = artifact["model"]
@@ -165,6 +168,27 @@ def run_simulation(model_path, data_path, alert_file, threshold=None, threat_int
                         flattened_results[f"{provider}:{result.get('ip', 'unknown')}"] = result
                 alert["ioc_matches"] = IOCMatcher().match(alert, flattened_results)
                 alert["threat_confidence"] = assess_threat(alert, flattened_results, alert["ioc_matches"])
+
+                if wazuh_forwarder is not None:
+                    try:
+                        wazuh_forwarder.send_alert(alert)
+
+                        alert["wazuh_forwarded"] = True
+
+                        print(
+                            f"WAZUH [{idx}]: "
+                            "Alert forwarded successfully"
+                            )
+
+                    except WazuhForwardingError as exc:
+
+                        alert["wazuh_forwarded"] = False
+
+                        print(
+                            f"WAZUH [{idx}]: "
+                            f"Forwarding failed - {exc}"
+                        )
+
                 alerts.append(alert)
                 f.write(json.dumps(alert) + "\n")
                 print(f"ALERT [{idx}]: Anomaly detected with confidence {prob:.4f}")
@@ -211,8 +235,18 @@ def main():
     parser.add_argument("--threshold", type=float, default=None, help="Detection threshold (uses model default if not set)")
     args = parser.parse_args()
     
-    run_simulation(args.model, args.data, args.alert_file, args.threshold)
+    wazuh_forwarder = WazuhForwarder.from_environment()
 
+    if wazuh_forwarder is not None:
+        print(
+            "Wazuh SIEM forwarding enabled: "
+            f"{wazuh_forwarder.host}:"
+            f"{wazuh_forwarder.port}"
+        )
+    else:
+        print("Wazuh SIEM forwarding disabled.")
+
+    run_simulation(args.model, args.data, args.alert_file, args.threshold, wazuh_forwarder=wazuh_forwarder)
 
 if __name__ == "__main__":
     main()
