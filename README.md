@@ -61,6 +61,16 @@ for i, (pred, prob) in enumerate(zip(predictions, probs)):
         print(f"Sample {i}: NORMAL (confidence={1-prob:.4f})")
 ```
 
+### 3. Replay labeled flows as a live stream for Wazuh
+
+The demo pipeline now supports sequential replay into a Wazuh-monitored JSONL file:
+
+```bash
+python live_traffic_simulator.py --scenario mixed --delay 0.5 --output logs/live_security_events.jsonl
+```
+
+Useful scenarios are `mixed`, `portscan`, `ddos`, `dos`, and `bruteforce`. The simulator writes canonical security events that the Wazuh agent can watch through a `localfile` entry.
+
 ### 3. Train on Your Own Data
 
 ```bash

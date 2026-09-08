@@ -1,0 +1,65 @@
+<group name="hybrid_ids,">
+  <rule id="100100" level="7">
+    <decoded_as>json</decoded_as>
+    <field name="event_type">network_intrusion</field>
+    <field name="detection.prediction">ATTACK</field>
+    <description>Hybrid IDS detected a malicious replay-based intrusion</description>
+    <group>hybrid_ids,malicious_detection,</group>
+  </rule>
+
+  <rule id="100101" level="10">
+    <if_sid>100100</if_sid>
+    <field name="event_type">network_intrusion</field>
+    <field name="risk.severity">HIGH</field>
+    <description>Hybrid IDS high-risk network intrusion</description>
+    <group>hybrid_ids,high_risk,</group>
+  </rule>
+
+  <rule id="100102" level="12">
+    <if_sid>100100</if_sid>
+    <field name="event_type">network_intrusion</field>
+    <field name="risk.severity">CRITICAL</field>
+    <description>Hybrid IDS critical network intrusion</description>
+    <group>hybrid_ids,high_risk,critical,</group>
+  </rule>
+
+  <rule id="100120" level="8">
+    <if_sid>100100</if_sid>
+    <field name="event_type">network_intrusion</field>
+    <field name="mitre.technique">T1046</field>
+    <description>Hybrid IDS MITRE-mapped PortScan detection</description>
+    <group>hybrid_ids,mitre_mapped,</group>
+  </rule>
+
+  <rule id="100121" level="8">
+    <if_sid>100100</if_sid>
+    <field name="event_type">network_intrusion</field>
+    <field name="mitre.technique">T1498</field>
+    <description>Hybrid IDS MITRE-mapped DoS or DDoS detection</description>
+    <group>hybrid_ids,mitre_mapped,</group>
+  </rule>
+
+  <rule id="100122" level="8">
+    <if_sid>100100</if_sid>
+    <field name="event_type">network_intrusion</field>
+    <field name="mitre.technique">T1110</field>
+    <description>Hybrid IDS MITRE-mapped brute-force detection</description>
+    <group>hybrid_ids,mitre_mapped,</group>
+  </rule>
+
+  <rule id="100130" level="9">
+    <if_sid>100100</if_sid>
+    <field name="event_type">network_intrusion</field>
+    <field name="threat_intelligence.reputation">malicious</field>
+    <description>Hybrid IDS threat-intelligence enriched detection</description>
+    <group>hybrid_ids,threat_intel_enriched,</group>
+  </rule>
+
+  <rule id="100131" level="8">
+    <if_sid>100100</if_sid>
+    <field name="threat_intelligence.details.abuseipdb.available">true</field>
+    <field name="threat_intelligence.details.abuseipdb.abuse_confidence_score">[1-9][0-9]?</field>
+    <description>Hybrid IDS AbuseIPDB-enriched detection</description>
+    <group>hybrid_ids,threat_intel_enriched,abuseipdb,</group>
+  </rule>
+</group>

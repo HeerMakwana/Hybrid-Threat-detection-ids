@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import re
+import warnings
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -18,6 +19,10 @@ from siem.wazuh_forwarder import (
     WazuhForwarder,
     WazuhForwardingError,
 )
+from live_traffic_simulator import run_live_simulation
+
+warnings.filterwarnings("ignore", message="`sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel`.*")
+warnings.filterwarnings("ignore", message="X has feature names, but RobustScaler was fitted without feature names")
 
 FEATURE_ALIASES = {
     "flow duration": "Flow Duration",
@@ -233,20 +238,38 @@ def main():
     parser.add_argument("--data", default="data/simulation_data.csv", help="Path to simulation data CSV")
     parser.add_argument("--alert-file", default="logs/simulation_alerts.jsonl", help="Output file for alerts")
     parser.add_argument("--threshold", type=float, default=None, help="Detection threshold (uses model default if not set)")
+    parser.add_argument("--legacy-batch", action="store_true", help="Use the legacy batch simulation path")
+    parser.add_argument("--demo-rows", type=int, default=100, help="Number of replay rows to process in demo mode")
     args = parser.parse_args()
     
-    wazuh_forwarder = WazuhForwarder.from_environment()
+    if args.legacy_batch:
+        wazuh_forwarder = WazuhForwarder.from_environment()
 
-    if wazuh_forwarder is not None:
-        print(
-            "Wazuh SIEM forwarding enabled: "
-            f"{wazuh_forwarder.host}:"
-            f"{wazuh_forwarder.port}"
-        )
-    else:
-        print("Wazuh SIEM forwarding disabled.")
+        if wazuh_forwarder is not None:
+            print(
+                "Wazuh SIEM forwarding enabled: "
+                f"{wazuh_forwarder.host}:"
+                f"{wazuh_forwarder.port}"
+            )
+        else:
+            print("Wazuh SIEM forwarding disabled.")
 
-    run_simulation(args.model, args.data, args.alert_file, args.threshold, wazuh_forwarder=wazuh_forwarder)
+        run_simulation(args.model, args.data, args.alert_file, args.threshold, wazuh_forwarder=wazuh_forwarder)
+        return
+
+    print("Running replay-based traffic demo for Wazuh.")
+    run_live_simulation(
+        model_path=args.model,
+        data_path=args.data,
+        output_path="logs/smoke_live_security_events.jsonl",
+        scenario="mixed",
+        delay=0.0,
+        limit=args.demo_rows,
+        threshold=args.threshold,
+        alerts_only=False,
+        overwrite=True,
+        target_alerts=None,
+    )
 
 if __name__ == "__main__":
     main()
