@@ -254,6 +254,7 @@ def find_best_threshold(
     recall_weight: float = 0.75,
     f1_weight: float = 0.20,
     fp_penalty: float = 0.05,
+    require_zero_fn: bool = False,
 ) -> tuple[float, dict[float, dict]]:
     """Vectorised threshold sweep using sort + cumsum.
 
@@ -300,6 +301,33 @@ def find_best_threshold(
         if score > best_score:
             best_score = score
             best_thresh = float(t)
+
+    if require_zero_fn:
+        positive_probs = probs[y_true == 1]
+        if len(positive_probs):
+            # The smallest positive probability is the highest boundary that
+            # still includes every validation attack. This is more precise
+            # than the coarse 0.01 threshold sweep and minimizes false alarms.
+            best_thresh = float(np.min(positive_probs))
+            n_pred_pos = int((probs >= best_thresh).sum())
+            tp = int(y_true[probs >= best_thresh].sum())
+            fp = n_pred_pos - tp
+            recall = tp / max(1, total_pos)
+            precision = tp / max(1, tp + fp)
+            f1 = 2 * precision * recall / max(1e-9, precision + recall)
+            fp_rate = fp / max(1, total_neg)
+            results[round(best_thresh, 4)] = {
+                "recall": round(recall, 4),
+                "precision": round(precision, 4),
+                "f1": round(f1, 4),
+                "fp_rate": round(fp_rate, 4),
+                "score": round(
+                    recall_weight * recall + f1_weight * f1 - fp_penalty * fp_rate,
+                    4,
+                ),
+            }
+        else:
+            best_thresh = 0.0
 
     return best_thresh, results
 
@@ -765,6 +793,7 @@ def train(args: argparse.Namespace) -> None:
         recall_weight=getattr(args, "recall_weight", 0.75),
         f1_weight=getattr(args, "f1_weight", 0.20),
         fp_penalty=getattr(args, "fp_penalty", 0.05),
+        require_zero_fn=getattr(args, "zero_fn", False),
     )
     log.info("Threshold search: %s", _elapsed(t))
     best = thresh_table[round(best_thresh, 4)]
@@ -795,7 +824,11 @@ def train(args: argparse.Namespace) -> None:
         "false_positive_rate":      float(fp_rate),
         "roc_auc":                  roc_auc,
         "threshold":                float(best_thresh),
-        "threshold_optimisation":   "recall*0.60 + F1*0.30 - FP_rate*0.10",
+        "threshold_optimisation":   (
+            "highest threshold with zero validation false negatives"
+            if getattr(args, "zero_fn", False)
+            else "recall*0.75 + F1*0.20 - FP_rate*0.05"
+        ),
         "confusion_matrix":         {"tn": int(tn), "fp": int(fp), "fn": int(fn), "tp": int(tp)},
         "anomalies_in_validation":  int(y_val.sum()),
         "anomalies_detected":       int(tp),
@@ -887,6 +920,10 @@ def main() -> None:
     parser.add_argument(
         "--fp-penalty", type=float, default=0.05,
         help="FP penalty for threshold optimisation (default 0.05)",
+    )
+    parser.add_argument(
+        "--zero-fn", action="store_true",
+        help="Choose the highest tested threshold with zero validation false negatives",
     )
     parser.add_argument("--stack", action="store_true", help="Train stacking meta-learner on out-of-fold predictions")
     parser.add_argument("--calibrate", action="store_true", help="Calibrate tree boosters on held-out calibration set")

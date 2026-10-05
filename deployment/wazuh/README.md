@@ -120,4 +120,14 @@ P1 events additionally contain `risk.priority: P1` and
 `workflow.status: PENDING_REVIEW`; these are queued for analyst approval and do
 not trigger blocking by themselves.
 
+After reviewing an event, record the decision locally:
+
+```bash
+python scripts/review_alert.py alert.json reviewed-alert.json \
+  --decision approve --reviewer analyst-1 --action COLLECT_EVIDENCE
+```
+
+Use `BLOCK_SOURCE` or `ISOLATE_HOST` only as a reviewed request. The workflow
+records `executed: false`; it does not perform a network change.
+
 To focus Discover on the IDS output during the presentation, use a query like `rule.groups:hybrid_ids` or `location:\"C:\\Users\\heerm\\projects\\Hybrid-Threat-detection-ids\\logs\\smoke_live_security_events.jsonl\"`.
