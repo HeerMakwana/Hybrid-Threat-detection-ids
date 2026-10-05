@@ -43,16 +43,48 @@ For enrollment, use manager address `127.0.0.1` and port `1515`. Keep the protoc
 
 If you prefer to keep a copy alongside the repo, see `windows-ossec.conf.example`.
 
-## Manager side
+## Ubuntu manager side
 
-Copy `hybrid_ids_rules.xml` to the manager rules directory and restart the manager after validation with `sudo /var/ossec/bin/wazuh-logtest`.
+Copy `hybrid_ids_rules.xml` to the manager rules directory, validate the XML/rules,
+then restart the manager:
 
 Recommended path on Ubuntu:
 
 ```bash
 sudo cp hybrid_ids_rules.xml /var/ossec/etc/rules/
+sudo chown wazuh:wazuh /var/ossec/etc/rules/hybrid_ids_rules.xml
+sudo /var/ossec/bin/wazuh-logtest
 sudo systemctl restart wazuh-manager
 ```
+
+Paste one complete JSON line from `logs/smoke_live_security_events.jsonl` into
+`wazuh-logtest`. The JSON decoder is built in; do not install the legacy syslog
+decoder for the JSONL agent path. Confirm that `100100` and, where applicable,
+`100101` or `100102` fire.
+
+Check manager health and rule loading:
+
+```bash
+sudo systemctl is-active wazuh-manager
+sudo tail -f /var/ossec/logs/alerts/alerts.json
+sudo grep -i hybrid_ids /var/ossec/logs/ossec.log
+```
+
+For the Windows agent path, the manager must be reachable on TCP `1514` and the
+agent enrollment service on TCP `1515`. If the IDS runs on Ubuntu instead, replace
+the Windows `<localfile>` with:
+
+```xml
+<localfile>
+  <location>/opt/hybrid-ids/logs/live_security_events.jsonl</location>
+  <log_format>json</log_format>
+</localfile>
+```
+
+Do not enable destructive active response initially. First validate alert rates for
+at least one capture window. After approval, bind an active response only to a
+high-confidence custom rule and require a human approval service or allowlist for
+production networks.
 
 If `wazuh-logtest` shows only a default rule such as `86600 Suricata messages`, the custom rule file is not yet loaded in the manager or the manager has not been restarted.
 
@@ -84,5 +116,8 @@ sudo /var/ossec/bin/wazuh-logtest
 ```
 
 Use `wazuh-logtest` by pasting one JSON line from `logs/smoke_live_security_events.jsonl` and confirm a custom rule fires. The event should look like the canonical JSON emitted by the replay simulator and include fields such as `event_type`, `detection.prediction`, `risk.severity`, `mitre.technique`, and `threat_intelligence.reputation`.
+P1 events additionally contain `risk.priority: P1` and
+`workflow.status: PENDING_REVIEW`; these are queued for analyst approval and do
+not trigger blocking by themselves.
 
 To focus Discover on the IDS output during the presentation, use a query like `rule.groups:hybrid_ids` or `location:\"C:\\Users\\heerm\\projects\\Hybrid-Threat-detection-ids\\logs\\smoke_live_security_events.jsonl\"`.

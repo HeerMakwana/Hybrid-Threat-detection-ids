@@ -10,6 +10,7 @@ import pandas as pd
 from detection.mitre_mapping import map_attack_to_mitre
 from detection.risk_scoring import calculate_risk
 from model_loader import load_model_artifact
+from feature_schema import align_feature_frame
 from siem.event_schema import create_security_event
 from threat_intelligence.abuseipdb import AbuseIPDBProvider
 from threat_intelligence.assessment import IOCMatcher, aggregate_reputation, assess_threat
@@ -226,41 +227,7 @@ def infer_attack_type(record):
 
 def align_cicids_columns(df, feature_columns):
     """Align input columns to the trained CICIDS feature vector."""
-
-    rename_map = {}
-    normalized_lookup = {_normalize(col): col for col in df.columns}
-    aliases = {
-        "flow_duration": "Flow Duration",
-        "total_fwd_packets": "Total Fwd Packets",
-        "total_backward_packets": "Total Backward Packets",
-        "total_length_of_fwd_packets": "Total Length of Fwd Packets",
-        "total_length_of_bwd_packets": "Total Length of Bwd Packets",
-        "fwd_packet_length_max": "Fwd Packet Length Max",
-        "fwd_packet_length_min": "Fwd Packet Length Min",
-        "fwd_packet_length_mean": "Fwd Packet Length Mean",
-        "fwd_packet_length_std": "Fwd Packet Length Std",
-        "bwd_packet_length_max": "Bwd Packet Length Max",
-        "bwd_packet_length_min": "Bwd Packet Length Min",
-        "bwd_packet_length_mean": "Bwd Packet Length Mean",
-        "bwd_packet_length_std": "Bwd Packet Length Std",
-        "flow_bytes_s": "Flow Bytes/s",
-        "flow_packets_s": "Flow Packets/s",
-        "packet_length_mean": "Packet Length Mean",
-        "packet_length_std": "Packet Length Std",
-    }
-    for alias, canonical in aliases.items():
-        if alias in normalized_lookup:
-            rename_map[normalized_lookup[alias]] = canonical
-
-    df = df.rename(columns=rename_map)
-
-    aligned = pd.DataFrame(index=df.index)
-    for feature in feature_columns:
-        if feature in df.columns:
-            aligned[feature] = pd.to_numeric(df[feature], errors="coerce").fillna(0.0)
-        else:
-            aligned[feature] = 0.0
-    return aligned
+    return align_feature_frame(df, feature_columns)
 
 
 def _summarize_threat_intel(provider_results):
@@ -479,6 +446,9 @@ class StreamingDetector:
             detector_version=str(self.model_type),
         )
         security_event["risk"]["factors"] = risk["factors"]
+        security_event["risk"]["priority"] = risk["priority"]
+        security_event["risk"]["recommended_action"] = risk["recommended_action"]
+        security_event["workflow"]["priority"] = risk["priority"]
         security_event["threat_intelligence"]["details"] = provider_results
 
         legacy_alert = {
@@ -513,9 +483,8 @@ class StreamingDetector:
             return _demo_threat_intel_lookup(source_ip)
         if source_ip:
             results = self.threat_intel_service.lookup(source_ip)
-            if any(result.get("available") for result in results.values()):
-                return results
-        return _demo_threat_intel_lookup(source_ip or "unknown")
+            return results
+        return {}
 
 
 def _attack_severity_score(attack_type):

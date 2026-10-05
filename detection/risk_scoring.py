@@ -22,6 +22,8 @@ def calculate_risk(
     return {
         "score": int(score),
         "severity": classify_risk(score),
+        "priority": classify_priority(score),
+        "recommended_action": "PENDING_HUMAN_REVIEW",
         "factors": components,
     }
 
@@ -37,6 +39,18 @@ def classify_risk(score):
     if score >= 40:
         return "medium"
     return "low"
+
+
+def classify_priority(score):
+    """Map risk to an ordered analyst queue without taking network action."""
+    score = _clamp(score, upper=100.0)
+    if score >= 80:
+        return "P1"
+    if score >= 60:
+        return "P2"
+    if score >= 40:
+        return "P3"
+    return "P4"
 
 
 def _clamp(value, lower=0.0, upper=1.0):

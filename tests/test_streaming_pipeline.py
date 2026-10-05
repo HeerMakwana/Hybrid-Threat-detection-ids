@@ -47,6 +47,8 @@ def test_streaming_detector_emits_canonical_event(tmp_path, monkeypatch):
     assert result.prediction == "ATTACK"
     assert result.security_event["mitre"]["technique"] == "T1046"
     assert result.security_event["risk"]["score"] > 0
+    assert result.security_event["workflow"]["status"] == "PENDING_REVIEW"
+    assert result.security_event["workflow"]["priority"] in {"P1", "P2", "P3", "P4"}
     assert result.security_event["threat_intelligence"]["sources"]
 
     output_path = tmp_path / "live_security_events.jsonl"

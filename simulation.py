@@ -20,6 +20,7 @@ from siem.wazuh_forwarder import (
     WazuhForwardingError,
 )
 from live_traffic_simulator import run_live_simulation
+from feature_schema import align_feature_frame
 
 warnings.filterwarnings("ignore", message="`sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel`.*")
 warnings.filterwarnings("ignore", message="X has feature names, but RobustScaler was fitted without feature names")
@@ -86,22 +87,7 @@ def extract_network_metadata(record):
 
 def align_cicids_columns(df, feature_columns):
     """Align columns to match training features."""
-    rename_map = {}
-    normalized_lookup = {_normalize(col): col for col in df.columns}
-    for alias, canonical in FEATURE_ALIASES.items():
-        if alias in normalized_lookup:
-            rename_map[normalized_lookup[alias]] = canonical
-
-    df = df.rename(columns=rename_map)
-
-    # Build aligned feature frame with features from training
-    aligned = pd.DataFrame(index=df.index)
-    for feature in feature_columns:
-        if feature in df.columns:
-            aligned[feature] = pd.to_numeric(df[feature], errors="coerce").fillna(0.0)
-        else:
-            aligned[feature] = 0.0
-    return aligned
+    return align_feature_frame(df, feature_columns)
 
 
 def run_simulation(model_path, data_path, alert_file, threshold=None, threat_intel_service=None,wazuh_forwarder=None,):
@@ -131,12 +117,12 @@ def run_simulation(model_path, data_path, alert_file, threshold=None, threat_int
     X = X.clip(lower=-1e12, upper=1e12)
     
     # Scale features
-    X_scaled = scaler.transform(X)
+    X_scaled = scaler.transform(X.to_numpy(dtype=np.float32, copy=False))
     print(f"Features scaled: shape {X_scaled.shape}", flush=True)
     
     # Make predictions
-    predictions = model.predict(X_scaled)
     probabilities = model.predict_proba(X_scaled)[:, 1]
+    predictions = (probabilities >= threshold).astype(np.int8)
     print(f"Predictions complete", flush=True)
     
     # Generate alerts for anomalies (predictions >= threshold)

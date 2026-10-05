@@ -62,6 +62,21 @@ class PacketWindow:
         f["end"] = now
         return key
 
+    def expire(self, now):
+        """Return and remove flows idle for at least ``timeout`` seconds."""
+        expired = []
+        for key, flow in list(self.flows.items()):
+            if float(now) - float(flow["end"]) >= self.timeout:
+                expired.append((key, self.extract_flow_features(key)))
+                del self.flows[key]
+        return expired
+
+    def flush(self):
+        """Return and remove every currently buffered flow."""
+        flushed = [(key, self.extract_flow_features(key)) for key in self.flows]
+        self.flows.clear()
+        return flushed
+
     def extract_flow_features(self, key):
         f = self.flows.get(key)
         if not f:

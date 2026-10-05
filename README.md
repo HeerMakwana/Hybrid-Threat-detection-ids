@@ -1,6 +1,6 @@
 # Hybrid ML-Based Intrusion Detection System (IDS)
 
-A high-performance ensemble machine learning model for detecting network intrusions and anomalies. Trained on CICIDS2017 dataset with **98.15% accuracy**, **92.55% precision**, **98.54% recall**, and only **1.95% false positive rate**.
+A flow-based ensemble IDS for live packet capture, replay, and Wazuh delivery. The production artifact is calibrated on the included CIC-UNSW-NB15 2024 dataset and uses one shared 17-feature contract across training and inference.
 
 ## Features
 
@@ -41,7 +41,7 @@ artifact = joblib.load('models/final_model.joblib')
 model = artifact['model']
 scaler = artifact['scaler']
 feature_columns = artifact['feature_columns']
-threshold = artifact['threshold']  # 0.210
+threshold = artifact['threshold']  # learned from the 2024 validation split
 
 # Prepare your feature matrix (shape: n_samples × 17)
 X = ...  # Your network traffic features
@@ -71,12 +71,39 @@ python live_traffic_simulator.py --scenario mixed --delay 0.5 --output logs/live
 
 Useful scenarios are `mixed`, `portscan`, `ddos`, `dos`, and `bruteforce`. The simulator writes canonical security events that the Wazuh agent can watch through a `localfile` entry.
 
-### 3. Train on Your Own Data
+### 4. Capture live packets
+
+Install Wireshark/TShark on the capture host, then run with an interface visible to
+the current user. Flows are closed after five seconds of inactivity and only then
+sent to the model:
+
+```bash
+python live_capture.py --interface eth0 --output logs/live_security_events.jsonl
+```
+
+On Windows, use the interface name reported by `tshark -D`. The capture process
+needs permission to read packets; the IDS itself does not require administrator
+privileges after capture permissions are configured.
+
+### 5. Compare model families
+
+Run the reproducible 2024 benchmark on a stratified sample:
+
+```bash
+python scripts/compare_models_2024.py --max-rows 100000
+```
+
+The report is written to `logs/model_comparison_2024.json`. Every emitted attack
+event has a `risk.priority` (`P1` through `P4`) and a `workflow.status` of
+`PENDING_REVIEW`; no network-blocking action is taken automatically.
+
+### 6. Train on Your Own Data
 
 ```bash
 python train_model.py \
     --data path/to/your/data.csv \
-    --label Label \
+    --labels path/to/labels.csv \
+      --label Label \
     --out models/my_model.joblib \
     --stack \
     --calibrate \
@@ -123,6 +150,7 @@ Pipeline:
 python train_model.py --help
 
   --data PATH              Path to CSV training data (required)
+  --labels PATH            Optional separate CSV with one label per data row
   --label COLUMN           Label column name (auto-detected if omitted)
   --max-rows N             Limit rows via stratified sampling (for quick testing)
   --out PATH               Output model path (default: models/final_model.joblib)

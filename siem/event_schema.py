@@ -51,6 +51,12 @@ def create_security_event(
             "score": risk_score,
             "severity": severity,
         },
+        "workflow": {
+            "status": "PENDING_REVIEW",
+            "priority": None,
+            "recommended_action": "PENDING_HUMAN_REVIEW",
+            "approved_by": None,
+        },
         "mitre": {
             "tactic": mitre_tactic,
             "technique": mitre_technique,

@@ -23,6 +23,14 @@
     <group>hybrid_ids,high_risk,critical,</group>
   </rule>
 
+  <rule id="100103" level="13">
+    <if_sid>100100</if_sid>
+    <field name="workflow.priority">P1</field>
+    <field name="workflow.status">PENDING_REVIEW</field>
+    <description>Hybrid IDS P1 alert awaiting analyst approval</description>
+    <group>hybrid_ids,priority_1,human_review,</group>
+  </rule>
+
   <rule id="100120" level="8">
     <if_sid>100100</if_sid>
     <field name="event_type">network_intrusion</field>

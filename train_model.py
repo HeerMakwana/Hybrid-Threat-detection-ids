@@ -45,6 +45,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import RobustScaler, LabelEncoder
 
 from feature_extractor import CICIDS_FEATURES
+from feature_schema import align_feature_frame
 
 
 class ProbabilityCalibrator:
@@ -216,25 +217,7 @@ def find_label_column(df: pd.DataFrame) -> str:
 
 def align_cicids_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Rename aliases to canonical names; build the fixed CICIDS feature frame."""
-    norm_lookup = {_normalize(c): c for c in df.columns}
-    rename_map = {
-        norm_lookup[alias]: canonical
-        for alias, canonical in FEATURE_ALIASES.items()
-        if alias in norm_lookup
-    }
-    df = df.rename(columns=rename_map)
-
-    aligned = pd.DataFrame(index=df.index, dtype=np.float32)
-    for feature in CICIDS_FEATURES:
-        if feature in df.columns:
-            aligned[feature] = (
-                pd.to_numeric(df[feature], errors="coerce")
-                .fillna(0.0)
-                .astype(np.float32)
-            )
-        else:
-            aligned[feature] = np.float32(0.0)
-    return aligned
+    return align_feature_frame(df, CICIDS_FEATURES).astype(np.float32)
 
 
 def encode_labels_vectorised(series: pd.Series) -> np.ndarray:
@@ -599,6 +582,13 @@ def train(args: argparse.Namespace) -> None:
     # ── 1. Load ───────────────────────────────────────────────────────────────
     t = time.time()
     df = load_data(args.data)
+    if getattr(args, "labels", None):
+        labels = pd.read_csv(args.labels)
+        if len(labels) != len(df):
+            raise ValueError(f"Feature/label row mismatch: {len(df)} != {len(labels)}")
+        label_column = args.label or find_label_column(labels)
+        df["Label"] = labels[label_column].to_numpy()
+        log.info("Attached labels from %s using column '%s'", args.labels, label_column)
     log.info("Load: %s", _elapsed(t))
 
     # Normalise column names early: remove stray leading/trailing whitespace
@@ -752,7 +742,8 @@ def train(args: argparse.Namespace) -> None:
     _log_mem("after training")
 
     # ── 10. Assemble ensemble ─────────────────────────────────────────────────
-    model = assemble_voting_classifier(fitted, ENSEMBLE_WEIGHTS)
+    if not isinstance(model, tuple):
+        model = assemble_voting_classifier(fitted, ENSEMBLE_WEIGHTS)
 
     # ── 11. Validation probabilities ──────────────────────────────────────────
     t = time.time()
@@ -871,6 +862,8 @@ def main() -> None:
     )
     parser.add_argument("--data",     required=True,
                         help="Path to labeled CSV dataset")
+    parser.add_argument("--labels",   default=None,
+                        help="Optional separate CSV containing one label row per data row")
     parser.add_argument("--label",    default=None,
                         help="Label column name (auto-detected if omitted)")
     parser.add_argument("--max-rows", type=int, default=None,

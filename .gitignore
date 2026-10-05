@@ -142,3 +142,5 @@ temp/
 data/simulation_data.csv
 data/train_sample.csv
 .venv312/
+data/
+models/checkpoints/
