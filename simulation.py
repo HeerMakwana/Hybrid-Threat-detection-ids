@@ -249,7 +249,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run simulation on model")
     parser.add_argument("--model", default="models/final_model.joblib", help="Path to trained model")
     parser.add_argument("--data", default="data/simulation_data.csv", help="Path to simulation data CSV")
-    parser.add_argument("--alert-file", default="logs/simulation_alerts.jsonl", help="Output file for alerts")
+    parser.add_argument("--alert-file", default="logs/live_security_events.jsonl", help="Output file for Wazuh JSON events")
     parser.add_argument("--threshold", type=float, default=None, help="Detection threshold (uses model default if not set)")
     parser.add_argument("--legacy-batch", action="store_true", help="Use the legacy batch simulation path")
     parser.add_argument("--demo-rows", type=int, default=100, help="Number of replay rows to process in demo mode")
@@ -274,7 +274,7 @@ def main():
     run_live_simulation(
         model_path=args.model,
         data_path=args.data,
-        output_path="logs/smoke_live_security_events.jsonl",
+        output_path=args.alert_file,
         scenario="mixed",
         delay=0.0,
         limit=args.demo_rows,
