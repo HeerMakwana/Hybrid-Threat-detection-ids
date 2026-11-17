@@ -1,0 +1,21 @@
+<client>
+  <server>
+    <address>127.0.0.1</address>
+    <port>1514</port>
+    <protocol>tcp</protocol>
+  </server>
+</client>
+
+<localfile>
+  <location>REPLACE_WITH_YOUR_REPO_PATH\logs\smoke_live_security_events.jsonl</location>
+  <log_format>json</log_format>
+</localfile>
+
+<!--
+Enrollment is handled separately from ossec.conf.
+Use manager address 127.0.0.1 and port 1515.
+For a clean Discover view, keep only this single <localfile> entry and
+remove any other Windows log sources from the agent config.
+To switch to the normal replay pipeline, change the localfile path to
+REPLACE_WITH_YOUR_REPO_PATH\logs\live_security_events.jsonl.
+-->

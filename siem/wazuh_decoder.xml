@@ -1,0 +1,4 @@
+<decoder name="hybrid-ids">
+    <prematch>^hybrid-ids:\s</prematch>
+    <plugin_decoder offset="after_prematch">JSON_Decoder</plugin_decoder>
+</decoder>

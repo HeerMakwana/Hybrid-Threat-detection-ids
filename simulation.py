@@ -3,9 +3,10 @@ import argparse
 import json
 import os
 import re
+import warnings
 import pandas as pd
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timezone
 from model_loader import load_model_artifact
 from threat_intelligence.abuseipdb import AbuseIPDBProvider
 from threat_intelligence.base import ThreatIntelligenceService
@@ -14,7 +15,15 @@ from threat_intelligence.assessment import IOCMatcher, assess_threat
 from threat_intelligence.opencti import OpenCTIProvider
 from threat_intelligence.otx import OTXProvider
 from threat_intelligence.virustotal import VirusTotalProvider
+from siem.wazuh_forwarder import (
+    WazuhForwarder,
+    WazuhForwardingError,
+)
+from live_traffic_simulator import run_live_simulation
+from feature_schema import align_feature_frame
 
+warnings.filterwarnings("ignore", message="`sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel`.*")
+warnings.filterwarnings("ignore", message="X has feature names, but RobustScaler was fitted without feature names")
 
 FEATURE_ALIASES = {
     "flow duration": "Flow Duration",
@@ -78,31 +87,17 @@ def extract_network_metadata(record):
 
 def align_cicids_columns(df, feature_columns):
     """Align columns to match training features."""
-    rename_map = {}
-    normalized_lookup = {_normalize(col): col for col in df.columns}
-    for alias, canonical in FEATURE_ALIASES.items():
-        if alias in normalized_lookup:
-            rename_map[normalized_lookup[alias]] = canonical
-
-    df = df.rename(columns=rename_map)
-
-    # Build aligned feature frame with features from training
-    aligned = pd.DataFrame(index=df.index)
-    for feature in feature_columns:
-        if feature in df.columns:
-            aligned[feature] = pd.to_numeric(df[feature], errors="coerce").fillna(0.0)
-        else:
-            aligned[feature] = 0.0
-    return aligned
+    return align_feature_frame(df, feature_columns)
 
 
-def run_simulation(model_path, data_path, alert_file, threshold=None, threat_intel_service=None):
+def run_simulation(model_path, data_path, alert_file, threshold=None, threat_intel_service=None,wazuh_forwarder=None,):
     print(f"Loading model: {model_path}", flush=True)
     artifact = load_model_artifact(model_path)
     model = artifact["model"]
     scaler = artifact["scaler"]
     feature_columns = artifact["feature_columns"]
-    threshold = threshold or artifact.get("threshold", 0.5)
+    threshold = artifact.get("threshold", 0.5) if threshold is None else threshold
+    threshold = float(threshold)
     
     print(f"Model type: {artifact.get('model_type', 'unknown')}", flush=True)
     print(f"Detection threshold: {threshold:.4f}", flush=True)
@@ -114,6 +109,11 @@ def run_simulation(model_path, data_path, alert_file, threshold=None, threat_int
     print(f"Loading simulation data: {data_path}", flush=True)
     df = pd.read_csv(data_path)
     print(f"Loaded {len(df)} records from simulation data", flush=True)
+    label_col = find_label_column(df)
+    actual = None
+    if label_col is not None:
+        normalized_labels = df[label_col].astype(str).str.strip().str.lower()
+        actual = (~normalized_labels.isin({"benign", "normal", "0"})).to_numpy(dtype=np.int8)
     
     # Preprocess data
     X = align_cicids_columns(df, feature_columns)
@@ -123,12 +123,12 @@ def run_simulation(model_path, data_path, alert_file, threshold=None, threat_int
     X = X.clip(lower=-1e12, upper=1e12)
     
     # Scale features
-    X_scaled = scaler.transform(X)
+    X_scaled = scaler.transform(X.to_numpy(dtype=np.float32, copy=False))
     print(f"Features scaled: shape {X_scaled.shape}", flush=True)
     
     # Make predictions
-    predictions = model.predict(X_scaled)
     probabilities = model.predict_proba(X_scaled)[:, 1]
+    predictions = (probabilities >= threshold).astype(np.int8)
     print(f"Predictions complete", flush=True)
     
     # Generate alerts for anomalies (predictions >= threshold)
@@ -144,8 +144,8 @@ def run_simulation(model_path, data_path, alert_file, threshold=None, threat_int
                 anomaly_count += 1
                 metadata = extract_network_metadata(df.iloc[idx])
                 alert = {
-                    "alert_id": f"sim-alert-{idx}-{int(datetime.utcnow().timestamp())}",
-                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "alert_id": f"sim-alert-{idx}-{int(datetime.now(timezone.utc).timestamp())}",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "record_index": int(idx),
                     "predicted_label": "ANOMALY",
                     "confidence": float(prob),
@@ -165,6 +165,27 @@ def run_simulation(model_path, data_path, alert_file, threshold=None, threat_int
                         flattened_results[f"{provider}:{result.get('ip', 'unknown')}"] = result
                 alert["ioc_matches"] = IOCMatcher().match(alert, flattened_results)
                 alert["threat_confidence"] = assess_threat(alert, flattened_results, alert["ioc_matches"])
+
+                if wazuh_forwarder is not None:
+                    try:
+                        wazuh_forwarder.send_alert(alert)
+
+                        alert["wazuh_forwarded"] = True
+
+                        print(
+                            f"WAZUH [{idx}]: "
+                            "Alert forwarded successfully"
+                            )
+
+                    except WazuhForwardingError as exc:
+
+                        alert["wazuh_forwarded"] = False
+
+                        print(
+                            f"WAZUH [{idx}]: "
+                            f"Forwarding failed - {exc}"
+                        )
+
                 alerts.append(alert)
                 f.write(json.dumps(alert) + "\n")
                 print(f"ALERT [{idx}]: Anomaly detected with confidence {prob:.4f}")
@@ -178,7 +199,25 @@ def run_simulation(model_path, data_path, alert_file, threshold=None, threat_int
     print(f"Total records processed: {len(df)}")
     print(f"Benign records: {benign_count}")
     print(f"Anomalies detected: {anomaly_count}")
-    print(f"Detection rate: {anomaly_count / len(df) * 100:.2f}%")
+    predicted_rate = anomaly_count / max(1, len(df))
+    print(f"Predicted anomaly rate: {predicted_rate * 100:.2f}%")
+    confusion = None
+    if actual is not None:
+        true_positive = int(((predictions == 1) & (actual == 1)).sum())
+        false_positive = int(((predictions == 1) & (actual == 0)).sum())
+        false_negative = int(((predictions == 0) & (actual == 1)).sum())
+        true_negative = int(((predictions == 0) & (actual == 0)).sum())
+        confusion = {
+            "label_column": label_col,
+            "true_positive": true_positive,
+            "false_positive": false_positive,
+            "false_negative": false_negative,
+            "true_negative": true_negative,
+            "recall": true_positive / max(1, true_positive + false_negative),
+            "false_positive_rate": false_positive / max(1, false_positive + true_negative),
+        }
+        print(f"Ground-truth label column: {label_col}")
+        print(f"False negatives: {false_negative}")
     print(f"Alerts written to: {alert_file}")
     print("="*60 + "\n")
     
@@ -188,14 +227,17 @@ def run_simulation(model_path, data_path, alert_file, threshold=None, threat_int
         "model_file": model_path,
         "model_type": artifact.get("model_type", "unknown"),
         "threshold": float(threshold),
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "total_records": int(len(df)),
         "benign_records": int(benign_count),
         "anomalies_detected": int(anomaly_count),
-        "detection_rate": float(anomaly_count / len(df)),
+        "predicted_anomaly_rate": float(predicted_rate),
+        "detection_rate": float(predicted_rate),
         "alert_file": alert_file,
         "alerts": alerts,
     }
+    if confusion is not None:
+        results["ground_truth"] = confusion
     
     results_file = os.path.join(os.path.dirname(alert_file) or ".", "simulation_results.json")
     with open(results_file, "w", encoding="utf-8") as f:
@@ -207,12 +249,40 @@ def main():
     parser = argparse.ArgumentParser(description="Run simulation on model")
     parser.add_argument("--model", default="models/final_model.joblib", help="Path to trained model")
     parser.add_argument("--data", default="data/simulation_data.csv", help="Path to simulation data CSV")
-    parser.add_argument("--alert-file", default="logs/simulation_alerts.jsonl", help="Output file for alerts")
+    parser.add_argument("--alert-file", default="logs/live_security_events.jsonl", help="Output file for Wazuh JSON events")
     parser.add_argument("--threshold", type=float, default=None, help="Detection threshold (uses model default if not set)")
+    parser.add_argument("--legacy-batch", action="store_true", help="Use the legacy batch simulation path")
+    parser.add_argument("--demo-rows", type=int, default=100, help="Number of replay rows to process in demo mode")
     args = parser.parse_args()
     
-    run_simulation(args.model, args.data, args.alert_file, args.threshold)
+    if args.legacy_batch:
+        wazuh_forwarder = WazuhForwarder.from_environment()
 
+        if wazuh_forwarder is not None:
+            print(
+                "Wazuh SIEM forwarding enabled: "
+                f"{wazuh_forwarder.host}:"
+                f"{wazuh_forwarder.port}"
+            )
+        else:
+            print("Wazuh SIEM forwarding disabled.")
+
+        run_simulation(args.model, args.data, args.alert_file, args.threshold, wazuh_forwarder=wazuh_forwarder)
+        return
+
+    print("Running replay-based traffic demo for Wazuh.")
+    run_live_simulation(
+        model_path=args.model,
+        data_path=args.data,
+        output_path=args.alert_file,
+        scenario="mixed",
+        delay=0.0,
+        limit=args.demo_rows,
+        threshold=args.threshold,
+        alerts_only=False,
+        overwrite=True,
+        target_alerts=None,
+    )
 
 if __name__ == "__main__":
     main()
