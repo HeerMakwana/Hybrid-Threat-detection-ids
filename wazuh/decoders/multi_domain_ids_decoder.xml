@@ -1,0 +1,4 @@
+<decoder name="multi-domain-ids-json">
+  <prematch>^{</prematch>
+  <plugin_decoder>JSON_Decoder</plugin_decoder>
+</decoder>

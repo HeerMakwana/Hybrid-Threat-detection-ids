@@ -1,0 +1,25 @@
+<group name="multi_domain_ids,">
+  <rule id="100500" level="3">
+    <decoded_as>multi-domain-ids-json</decoded_as>
+    <field name="model_prediction">^suspicious$</field>
+    <description>Multi-domain IDS detection: $(attack_name) in $(detection_domain)</description>
+  </rule>
+
+  <rule id="100501" level="12">
+    <if_sid>100500</if_sid>
+    <field name="severity">^critical$</field>
+    <description>Critical multi-domain IDS alert: $(attack_name)</description>
+  </rule>
+
+  <rule id="100502" level="10">
+    <if_sid>100500</if_sid>
+    <field name="severity">^high$</field>
+    <description>High-severity multi-domain IDS alert: $(attack_name)</description>
+  </rule>
+
+  <rule id="100503" level="7">
+    <if_sid>100500</if_sid>
+    <field name="event_category">^correlated_incident$</field>
+    <description>Correlated multi-domain incident: $(correlation_id)</description>
+  </rule>
+</group>

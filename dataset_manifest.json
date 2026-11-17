@@ -1,0 +1,671 @@
+{
+  "inventory_date": "2026-11-15",
+  "dataset_root": "C:\\Users\\ISHITA DUBEY\\Downloads",
+  "dataset_root_environment_variable": "MULTI_DOMAIN_IDS_DATASET_ROOT",
+  "path_override_environment_variable_pattern": "MULTI_DOMAIN_IDS_<DATASET_NAME>_PATH",
+  "data_policy": "Dataset files are referenced in place and are not included in this repository.",
+  "sources": {
+    "ton_iot_archive": {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip",
+      "format": "ZIP archive",
+      "size_bytes": 20875224279,
+      "integrity_note": "The archive has no standard end-of-central-directory record and Windows tar.exe reports a truncated input while scanning it. All 20 listed processed CSV members were independently verified against their ZIP data-descriptor sizes and CRC32 values; this does not certify other archive members."
+    },
+    "lanl_schema_documentation": "https://csr.lanl.gov/data/cyber1/",
+    "cicids2017_dataset_description": "https://www.unb.ca/cic/datasets/ids-2017.html"
+  },
+  "schemas": {
+    "cicids_sample": {
+      "columns": [
+        " Destination Port", " Flow Duration", " Total Fwd Packets", " Total Backward Packets",
+        "Total Length of Fwd Packets", " Total Length of Bwd Packets", " Fwd Packet Length Max",
+        " Fwd Packet Length Min", " Fwd Packet Length Mean", " Fwd Packet Length Std",
+        "Bwd Packet Length Max", " Bwd Packet Length Min", " Bwd Packet Length Mean",
+        " Bwd Packet Length Std", "Flow Bytes/s", " Flow Packets/s", " Flow IAT Mean",
+        " Flow IAT Std", " Flow IAT Max", " Flow IAT Min", "Fwd IAT Total", " Fwd IAT Mean",
+        " Fwd IAT Std", " Fwd IAT Max", " Fwd IAT Min", "Bwd IAT Total", " Bwd IAT Mean",
+        " Bwd IAT Std", " Bwd IAT Max", " Bwd IAT Min", "Fwd PSH Flags", " Bwd PSH Flags",
+        " Fwd URG Flags", " Bwd URG Flags", " Fwd Header Length", " Bwd Header Length",
+        "Fwd Packets/s", " Bwd Packets/s", " Min Packet Length", " Max Packet Length",
+        " Packet Length Mean", " Packet Length Std", " Packet Length Variance", "FIN Flag Count",
+        " SYN Flag Count", " RST Flag Count", " PSH Flag Count", " ACK Flag Count",
+        " URG Flag Count", " CWE Flag Count", " ECE Flag Count", " Down/Up Ratio",
+        " Average Packet Size", " Avg Fwd Segment Size", " Avg Bwd Segment Size",
+        " Fwd Header Length.1", "Fwd Avg Bytes/Bulk", " Fwd Avg Packets/Bulk",
+        " Fwd Avg Bulk Rate", " Bwd Avg Bytes/Bulk", " Bwd Avg Packets/Bulk",
+        "Bwd Avg Bulk Rate", "Subflow Fwd Packets", " Subflow Fwd Bytes",
+        " Subflow Bwd Packets", " Subflow Bwd Bytes", "Init_Win_bytes_forward",
+        " Init_Win_bytes_backward", " act_data_pkt_fwd", " min_seg_size_forward",
+        "Active Mean", " Active Std", " Active Max", " Active Min", "Idle Mean", " Idle Std",
+        " Idle Max", " Idle Min", " Label"
+      ],
+      "loader_feature_columns": [
+        "Flow Duration", "Total Fwd Packets", "Total Backward Packets",
+        "Total Length of Fwd Packets", "Total Length of Bwd Packets",
+        "Fwd Packet Length Max", "Fwd Packet Length Min", "Fwd Packet Length Mean",
+        "Fwd Packet Length Std", "Bwd Packet Length Max", "Bwd Packet Length Min",
+        "Bwd Packet Length Mean", "Bwd Packet Length Std", "Flow Bytes/s",
+        "Flow Packets/s", "Packet Length Mean", "Packet Length Std"
+      ],
+      "label_column": " Label",
+      "header_note": "Raw CSV header contains leading spaces; loader strips surrounding whitespace.",
+      "provenance": {
+        "matches_tracked_source_project_sample": true,
+        "source_project_commit": "89fb916e843b47ffa7c7ec08a9d59ed7fed6282a",
+        "line_ending_normalized_sha256": "16ae6590acb9ce9e043646af24e3080cd451905c3920d550032eaa287f456623",
+        "underlying_official_cicids_source_confirmed": false
+      },
+      "feature_missing_values": {"Flow Bytes/s": 3}
+    },
+    "sqli": {
+      "columns": [
+        "Query", "Type Attack", "query_length", "word_count", "special_char_count",
+        "digit_count", "contains_select", "contains_union", "contains_insert",
+        "contains_update", "contains_delete", "contains_where", "contains_and",
+        "contains_or", "keyword_ratio", "contains_double_dash", "contains_comment",
+        "contains_semicolon", "contains_single_quote", "contains_double_quote",
+        "contains_equals", "contains_sleep", "max_word_length", "min_word_length",
+        "uppercase_count", "special_char_ratio", "Query_Entropy", "Query_Digit_Ratio"
+      ],
+      "target_column": "Type Attack",
+      "features": "The 26 numeric columns after Query and Type Attack; Query is kept separately.",
+      "raw_query_feature_extraction": "Not implemented: comparison against the full file showed that some feature definitions (including special_char_count, keyword_ratio, and contains_comment) cannot be reproduced from the Query column with the available documentation."
+    },
+    "lanl_dns_positional": {
+      "field_count": 3,
+      "columns": ["time", "source_computer", "resolved_computer"],
+      "interpretation": "Names follow the official LANL format description and observed field order. The local headerless file has no independent codebook; value semantics beyond the documented names are not inferred."
+    },
+    "lanl_flows_positional": {
+      "field_count": 9,
+      "columns": [
+        "time", "duration", "source_computer", "source_port", "destination_computer",
+        "destination_port", "protocol", "packet_count", "byte_count"
+      ],
+      "interpretation": "Names follow the official LANL format description and observed field order. The local headerless file has no independent codebook; value semantics beyond the documented names are not inferred."
+    },
+    "lanl_redteam_positional": {
+      "field_count": 4,
+      "columns": ["time", "user_domain", "source_computer", "destination_computer"],
+      "interpretation": "Names follow the official LANL format description and observed field order. Records are red-team event annotations, not a balanced binary table."
+    },
+    "lanl_auth_positional": {
+      "field_count": 9,
+      "columns": [
+        "time", "source_user_domain", "destination_user_domain", "source_computer",
+        "destination_computer", "authentication_type", "logon_type",
+        "authentication_orientation", "success_failure"
+      ],
+      "interpretation": "Field order follows official LANL documentation and was confirmed on the first five local records; full file validation requires consuming the gzip stream."
+    },
+    "lanl_proc_positional": {
+      "field_count": 5,
+      "columns": ["time", "user_domain", "computer", "process_name", "start_end"],
+      "interpretation": "Field order follows official LANL documentation and was confirmed on two local records."
+    },
+    "ton_network": {
+      "columns": [
+        "ts", "src_ip", "src_port", "dst_ip", "dst_port", "proto", "service", "duration",
+        "src_bytes", "dst_bytes", "conn_state", "missed_bytes", "src_pkts", "src_ip_bytes",
+        "dst_pkts", "dst_ip_bytes", "dns_query", "dns_qclass", "dns_qtype", "dns_rcode",
+        "dns_AA", "dns_RD", "dns_RA", "dns_rejected", "ssl_version", "ssl_cipher",
+        "ssl_resumed", "ssl_established", "ssl_subject", "ssl_issuer", "http_trans_depth",
+        "http_method", "http_uri", "http_referrer", "http_version",
+        "http_request_body_len", "http_response_body_len", "http_status_code",
+        "http_user_agent", "http_orig_mime_types", "http_resp_mime_types", "weird_name",
+        "weird_addl", "weird_notice", "label", "type"
+      ]
+    },
+    "ton_iot_fridge": {
+      "columns": ["date", "time", "fridge_temperature", "temp_condition", "label", "type"]
+    },
+    "ton_iot_garage_door": {
+      "columns": ["date", "time", "door_state", "sphone_signal", "label", "type"]
+    },
+    "ton_iot_gps": {
+      "columns": ["date", "time", "latitude", "longitude", "label", "type"]
+    },
+    "ton_iot_modbus": {
+      "columns": [
+        "date", "time", "FC1_Read_Input_Register", "FC2_Read_Discrete_Value",
+        "FC3_Read_Holding_Register", "FC4_Read_Coil", "label", "type"
+      ]
+    },
+    "ton_iot_motion_light": {
+      "columns": ["date", "time", "motion_status", "light_status", "label", "type"]
+    },
+    "ton_iot_thermostat": {
+      "columns": ["date", "time", "current_temperature", "thermostat_status", "label", "type"]
+    },
+    "ton_iot_weather": {
+      "columns": ["date", "time", "temperature", "pressure", "humidity", "label", "type"]
+    },
+    "ton_linux_disk": {
+      "columns": ["ts", "PID", "RDDSK", "WRDSK", "WCANCL", "DSK", "CMD", "label", "type"]
+    },
+    "ton_linux_memory": {
+      "columns": [
+        "ts", "PID", "MINFLT", "MAJFLT", "VSTEXT", "VSIZE", "RSIZE", "VGROW",
+        "RGROW", "MEM", "CMD", "label", "type"
+      ]
+    },
+    "ton_linux_process": {
+      "columns": [
+        "ts", "PID", "TRUN", "TSLPI", "TSLPU", "POLI", "NICE", "PRI", "RTPR",
+        "CPUNR", "Status", "EXC", "State", "CPU", "CMD", "label", "type"
+      ]
+    }
+  },
+  "datasets": [
+    {
+      "name": "CICIDS2017 format sample",
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\train_sample.csv",
+      "format": "CSV",
+      "size_bytes": 73682719,
+      "rows": 200000,
+      "schema": "cicids_sample",
+      "label_distribution": {"BENIGN": 71973, "DDoS": 128027},
+      "assigned_domain": "network",
+      "duplicate_rows": 1913,
+      "processing_status": "Loader validates known CICIDS2017 labels and preserves three missing Flow Bytes/s values as null. This is a 200,000-row sample, not the full corpus; its underlying official-source provenance is unverified."
+    },
+    {
+      "name": "CICIDS-format simulation sample",
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\simulation_data.csv",
+      "format": "CSV",
+      "size_bytes": 169136,
+      "rows": 500,
+      "columns": 79,
+      "schema": "cicids_sample",
+      "label_distribution": {
+        "BENIGN": 404,
+        "DoS Hulk": 38,
+        "PortScan": 30,
+        "DDoS": 20,
+        "DoS GoldenEye": 3,
+        "DoS slowloris": 2,
+        "FTP-Patator": 2,
+        "DoS Slowhttptest": 1
+      },
+      "missing_cells": 0,
+      "duplicate_rows": 4,
+      "assigned_domain": "network",
+      "processing_status": "Schema and labels inspected. Provenance and independence from other CICIDS-format data are unverified; not used to claim model performance."
+    },
+    {
+      "name": "Normal and Malicious SQL Injection",
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\Normal &Malicious SQLi.csv",
+      "format": "CSV",
+      "size_bytes": 14964657,
+      "rows": 64172,
+      "schema": "sqli",
+      "label_distribution": {"Malicious": 38307, "Normal": 25865},
+      "assigned_domain": "database_application",
+      "processing_status": "Strict loader validated the observed Normal/Malicious labels and all 26 numeric features; target and raw query are excluded from model features."
+    },
+    {
+      "name": "LANL auth",
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\auth.txt.gz",
+      "format": "gzip-compressed, headerless comma-separated text",
+      "size_bytes": 7626505167,
+      "schema": "lanl_auth_positional",
+      "observed_sample_rows": 5,
+      "label_distribution": null,
+      "assigned_domain": "identity",
+      "processing_status": "Complete full-stream read: 1,051,430,459 rows, zero malformed rows, and gzip EOF/trailer validation succeeded. Outcomes: 1,038,590,151 success and 12,840,308 fail (1.2212% failure ratio). Time-bounded red-team association matched 735 of 749 annotations to 740 auth rows. Summary/checkpoint are under artifacts/identity. A prior transient checkpoint replacement error was recovered by resuming."
+    },
+    {
+      "name": "LANL flows",
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\flows.txt.gz",
+      "format": "gzip-compressed, headerless comma-separated text",
+      "size_bytes": 1083479100,
+      "schema": "lanl_flows_positional",
+      "observed_sample_rows": 10000,
+      "label_distribution": null,
+      "label_note": "No label field is present in the observed records.",
+      "assigned_domain": "network",
+      "processing_status": "Strict positional streaming loader uses the official LANL field order and rejects rows with non-9-field widths; no labels are present."
+    },
+    {
+      "name": "LANL DNS",
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\dns.txt.gz",
+      "format": "gzip-compressed, headerless comma-separated text",
+      "size_bytes": 185104948,
+      "schema": "lanl_dns_positional",
+      "observed_sample_rows": 10000,
+      "label_distribution": null,
+      "label_note": "No label field is present in the observed records.",
+      "assigned_domain": "dns",
+      "processing_status": "Strict positional streaming loader uses the official LANL field order and rejects rows with non-3-field widths; no labels are present."
+    },
+    {
+      "name": "LANL redteam",
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\redteam.txt.gz",
+      "format": "gzip-compressed, headerless comma-separated text",
+      "size_bytes": 4858,
+      "rows": 749,
+      "schema": "lanl_redteam_positional",
+      "label_distribution": {"redteam_event_annotations": 749},
+      "assigned_domain": "identity_and_host_ground_truth",
+      "processing_status": "Strict positional loader uses the official LANL field order and rejects non-4-field rows; event annotations are not converted into fabricated benign/attack pairs."
+    },
+    {
+      "name": "LANL proc",
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\proc.txt.gz",
+      "format": "gzip-compressed, headerless comma-separated text",
+      "size_bytes": 2358611883,
+      "schema": "lanl_proc_positional",
+      "observed_sample_rows": 2,
+      "label_distribution": null,
+      "assigned_domain": "host_endpoint",
+      "processing_status": "Located and sample records match the documented five-field schema; the strict chunked LANL loader now supports this dataset. Full processing has not been run."
+    },
+    {
+      "name": "ToN_IoT processed network",
+      "source_archive": "ton_iot_archive",
+      "format": "CSV archive members",
+      "schema": "ton_network",
+      "assigned_domain": "network",
+      "processing_status": "Seven available members passed complete size and CRC32 checks; error-marker entries and missing network members make this an incomplete subset."
+    },
+    {
+      "name": "ToN_IoT processed IoT devices",
+      "source_archive": "ton_iot_archive",
+      "format": "CSV archive members",
+      "schema_note": "Each device file has its own schema; see per-file schema IDs.",
+      "assigned_domain": "host_endpoint_iot",
+      "processing_status": "All seven available device members passed complete size and CRC32 checks; tables remain separate."
+    },
+    {
+      "name": "ToN_IoT processed Linux",
+      "source_archive": "ton_iot_archive",
+      "format": "CSV archive members",
+      "schema_note": "Disk, memory, and process files use distinct schemas; see per-file schema IDs.",
+      "assigned_domain": "host_endpoint",
+      "processing_status": "All six available Linux members passed complete size and CRC32 checks; tables remain separate."
+    },
+    {
+      "name": "ToN_IoT processed Windows",
+      "source_archive": "ton_iot_archive",
+      "format": null,
+      "schema": null,
+      "label_distribution": null,
+      "assigned_domain": "host_endpoint",
+      "processing_status": "No processed Windows CSV member was found in the archive listing; feature-description documents were present."
+    }
+  ],
+  "ton_iot_files": [
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_1.csv",
+      "size_bytes": 146725605,
+      "rows": 1000000,
+      "schema": "ton_network",
+      "label_distribution": {"0": 208679, "1": 791321},
+      "type_distribution": {"normal": 208679, "scanning": 791321},
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "ba26206b"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_10.csv",
+      "size_bytes": 146536008,
+      "rows": 1000000,
+      "schema": "ton_network",
+      "label_distribution": {"0": 30002, "1": 969998},
+      "type_distribution": {"normal": 30002, "dos": 969998},
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "44847535"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_11.csv",
+      "size_bytes": 148428210,
+      "rows": 1000000,
+      "schema": "ton_network",
+      "label_distribution": {"0": 35168, "1": 964832},
+      "type_distribution": {"normal": 35168, "dos": 839637, "injection": 125195},
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "bfc81e5d"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_12.csv",
+      "size_bytes": 153629818,
+      "rows": 1000000,
+      "schema": "ton_network",
+      "label_distribution": {"0": 32806, "1": 967194},
+      "type_distribution": {"normal": 32806, "injection": 327464, "ddos": 639730},
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "9ca4fab1"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_13.csv",
+      "size_bytes": 151016885,
+      "rows": 1000000,
+      "schema": "ton_network",
+      "label_distribution": {"0": 917, "1": 999083},
+      "type_distribution": {"normal": 917, "ddos": 999083},
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "98d5d26d"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_14.csv",
+      "size_bytes": 153329384,
+      "rows": 1000000,
+      "schema": "ton_network",
+      "label_distribution": {"0": 583, "1": 999417},
+      "type_distribution": {"normal": 583, "ddos": 999417},
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "d25e649e"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_15.csv",
+      "size_bytes": 153194923,
+      "rows": 1000000,
+      "schema": "ton_network",
+      "label_distribution": {"0": 1060, "1": 998940},
+      "type_distribution": {"normal": 1060, "ddos": 998940},
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "3414c270"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_IoT_dataset/IoT_Fridge.csv",
+      "size_bytes": 24965618,
+      "rows": 587076,
+      "schema": "ton_iot_fridge",
+      "label_distribution": {"0": 500827, "1": 86249},
+      "type_distribution": {
+        "normal": 500827, "backdoor": 35568, "ddos": 10233, "injection": 7079,
+        "password": 28425, "ransomware": 2902, "xss": 2042
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "8a6a95f8"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_IoT_dataset/IoT_Garage_Door.csv",
+      "size_bytes": 25760262,
+      "rows": 591446,
+      "schema": "ton_iot_garage_door",
+      "label_distribution": {"0": 515443, "1": 76003},
+      "type_distribution": {
+        "normal": 515443, "backdoor": 35568, "ddos": 10230, "password": 19287,
+        "injection": 6331, "scanning": 529, "ransomware": 2902, "xss": 1156
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "d78b7cd2"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_IoT_dataset/IoT_GPS_Tracker.csv",
+      "size_bytes": 31423494,
+      "rows": 595686,
+      "schema": "ton_iot_gps",
+      "label_distribution": {"0": 513849, "1": 81837},
+      "type_distribution": {
+        "normal": 513849, "backdoor": 35571, "ddos": 10226, "injection": 6904,
+        "password": 25176, "ransomware": 2833, "scanning": 550, "xss": 577
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "1e63ca62"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_IoT_dataset/IoT_Modbus.csv",
+      "size_bytes": 15347014,
+      "rows": 287194,
+      "schema": "ton_iot_modbus",
+      "label_distribution": {"0": 222855, "1": 64339},
+      "type_distribution": {
+        "normal": 222855, "scanning": 529, "injection": 5186,
+        "password": 18115, "xss": 498, "backdoor": 40011
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "b56a31c3"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_IoT_dataset/IoT_Motion_Light.csv",
+      "size_bytes": 16561568,
+      "rows": 452262,
+      "schema": "ton_iot_motion_light",
+      "label_distribution": {"0": 388328, "1": 63934},
+      "type_distribution": {
+        "normal": 388328, "backdoor": 28209, "ddos": 8121, "injection": 5595,
+        "password": 17521, "ransomware": 2264, "scanning": 1775, "xss": 449
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "5eae6e47"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_IoT_dataset/IoT_Thermostat.csv",
+      "size_bytes": 19046111,
+      "rows": 442228,
+      "schema": "ton_iot_thermostat",
+      "label_distribution": {"0": 385953, "1": 56275},
+      "type_distribution": {
+        "normal": 385953, "backdoor": 35568, "injection": 9498, "password": 8435,
+        "ransomware": 2264, "scanning": 61, "xss": 449
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "ac697182"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_IoT_dataset/IoT_Weather.csv",
+      "size_bytes": 42002630,
+      "rows": 650242,
+      "schema": "ton_iot_weather",
+      "label_distribution": {"0": 559718, "1": 90524},
+      "type_distribution": {
+        "normal": 559718, "backdoor": 35641, "ddos": 15182, "injection": 9726,
+        "password": 25715, "ransomware": 2865, "scanning": 529, "xss": 866
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "0eee9753"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Linux_dataset/linux_disk_1.csv",
+      "size_bytes": 44541585,
+      "rows": 1000000,
+      "schema": "ton_linux_disk",
+      "label_distribution": {"0": 805922, "1": 194078},
+      "type_distribution": {
+        "normal": 805922, "password": 41348, "scanning": 63745, "ddos": 35247,
+        "dos": 33059, "injection": 20623, "mitm": 56
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "6254a809"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Linux_dataset/linux_disk_2.csv",
+      "size_bytes": 40109807,
+      "rows": 927361,
+      "schema": "ton_linux_disk",
+      "label_distribution": {"0": 804802, "1": 122559},
+      "type_distribution": {
+        "normal": 804802, "xss": 17759, "ddos": 36356, "dos": 37629,
+        "injection": 20698, "mitm": 56, "password": 10061
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "7bd028c9"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Linux_dataset/linux_memory1.csv",
+      "size_bytes": 60714835,
+      "rows": 1000000,
+      "schema": "ton_linux_memory",
+      "label_distribution": {"0": 879245, "1": 120755},
+      "type_distribution": {
+        "normal": 879245, "ddos": 36356, "dos": 37629, "injection": 20698,
+        "mitm": 56, "password": 26016
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "ba5bda03"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Linux_dataset/linux_memory2.csv",
+      "size_bytes": 60871429,
+      "rows": 1000000,
+      "schema": "ton_linux_memory",
+      "label_distribution": {"0": 915132, "1": 84868},
+      "type_distribution": {
+        "normal": 915132, "ddos": 9333, "dos": 37654, "injection": 37825, "mitm": 56
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "7dfd0007"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Linux_dataset/Linux_process_1.csv",
+      "size_bytes": 64777970,
+      "rows": 1000000,
+      "schema": "ton_linux_process",
+      "label_distribution": {"0": 879245, "1": 120755},
+      "type_distribution": {
+        "normal": 879245, "ddos": 36356, "dos": 37629, "injection": 20698,
+        "mitm": 56, "password": 26016
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "6af283e8"
+    },
+    {
+      "path": "C:\\Users\\ISHITA DUBEY\\Downloads\\OneDrive_2026-11-13.zip::TON_IoT datasets/Processed_datasets/Processed_Linux_dataset/Linux_process_2.csv",
+      "size_bytes": 60619695,
+      "rows": 927968,
+      "schema": "ton_linux_process",
+      "label_distribution": {"0": 757359, "1": 170609},
+      "type_distribution": {
+        "normal": 757359, "ddos": 35247, "dos": 33092, "injection": 20613,
+        "mitm": 56, "password": 25393, "scanning": 38449, "xss": 17759
+      },
+      "archive_stream_exit_code": 1,
+      "archive_crc32": "2abba30f"
+    }
+  ],
+  "excluded_archive_members": {
+    "ton_iot_network_error_markers": [
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_2.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_3.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_4.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_5.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_6.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_7.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_8.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_9.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_16.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_17.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_18.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_19.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_20.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_21.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_22.csv_Error.txt",
+      "TON_IoT datasets/Processed_datasets/Processed_Network_dataset/Network_dataset_23.csv_Error.txt"
+    ],
+    "status": "These are archive error-marker filenames, not dataset CSV files; no schema, size, or class distribution was inferred."
+  },
+  "inventory_notes": [
+    "The recursive Downloads scan found train_sample.csv, simulation_data.csv, Normal &Malicious SQLi.csv, flows.txt.gz, proc.txt.gz, dns.txt.gz, redteam.txt.gz, auth.txt.gz, and OneDrive_2026-11-13.zip.",
+    "The recursive search found a 200,000-row CICIDS-format train_sample.csv but no complete CICIDS2017 directory or full dataset file set. simulation_data.csv has 500 rows and unverified provenance.",
+    "The ToN_IoT archive contains 20 processed CSV members listed above; all 20 payload sizes and CRC32 values match their local ZIP data descriptors. Processed Windows CSV files were not present in the archive listing.",
+    "The ToN_IoT archive is split/spanned or incomplete and could not be opened by the standard .NET ZIP reader; previously verified member-level results do not establish completeness of the full archive.",
+    "auth.txt.gz remained at 7,626,505,167 bytes across the stability check. Its first five records have nine fields matching the expected LANL auth schema; end-to-end gzip integrity is only established by a complete stream read.",
+    "proc.txt.gz is present at 2,358,611,883 bytes; its first two records have five fields matching the expected LANL process schema.",
+    "train_sample.csv matches the tracked old-project sample after line-ending normalization; the old-project commit establishes the local sample lineage, not its original CICIDS download provenance."
+  ],
+  "integrity_audit": {
+    "cicids_sample": {
+      "rows": 200000,
+      "labels": ["BENIGN", "DDoS"],
+      "feature_columns_exclude_label": true,
+      "missing_feature_values": {"Flow Bytes/s": 3},
+      "full_cicids2017_corpus_found": false,
+      "underlying_official_source_verified": false
+    },
+    "sqli": {
+      "observed_labels": ["Malicious", "Normal"],
+      "feature_columns_exclude_query_and_target": true,
+      "non_numeric_or_missing_feature_values": 0,
+      "full_row_duplicates": 0,
+      "rows_with_repeated_feature_label_vectors": 10878,
+      "repeated_feature_vectors": 2855,
+      "conflicting_feature_vector_groups": 5,
+      "rows_in_conflicting_feature_vector_groups": 136,
+      "conflicting_groups_excluded_before_training": true,
+      "train_test_feature_group_overlap": 0,
+      "raw_query_feature_extraction_verified": false
+    },
+    "ton_iot": {
+      "archive_is_standard_zip": false,
+      "archive_reader_warning": "Python zipfile rejects the missing end-of-central-directory record; tar.exe reports a truncated input while scanning the archive.",
+      "stream_exit_code_interpretation": "tar.exe exit code 1 is an archive-level warning; it does not contradict the independently verified sizes and CRC32 values for these 20 CSV members.",
+      "processed_csv_member_count": 20,
+      "members_with_matching_local_size_and_crc32": 20,
+      "crc_validation": "Recomputed CRC32 over each stored CSV payload and matched it to the local ZIP data descriptor; payload byte count matched both descriptor sizes and the manifest size.",
+      "strict_loader_validation": "All 20 members were streamed through iter_ton_iot_csv; row counts, label distributions, and type distributions matched this manifest.",
+      "feature_columns_exclude_label_and_type": true,
+      "label_type_consistency_checked_by_loader": true,
+      "corpus_completeness": "Incomplete subset; multiple network files are represented only by error-marker entries and no processed Windows CSV was found."
+    },
+    "lanl": {
+      "documented_schemas_source": "https://csr.lanl.gov/data/cyber1/",
+      "field_order": "Auth, proc, DNS, flows, and redteam local samples match the official format descriptions; files remain headerless and schema mapping is positional. '?' and blank fields are normalized to missing.",
+      "auth_file_found": true,
+      "auth_size_bytes": 7626505167,
+      "auth_full_gzip_integrity_verified": false,
+      "proc_file_found": true,
+      "proc_size_bytes": 2358611883,
+      "proc_full_gzip_integrity_verified": false
+    },
+    "leakage_and_label_validation": {
+      "cicids": "Only the legacy ordered 17 features are selected; unknown label values are rejected.",
+      "sqli": "Only the 26 numeric columns are selected; unknown labels are rejected.",
+      "ton_iot": "label and type are excluded from features; only binary labels and known type values are accepted, and normal/attack consistency is enforced."
+    }
+  },
+  "training_readiness": {
+    "cicids_sample": {
+      "status": "NOT_READY_AS_FULL_CICIDS_TRAINING_DATA",
+      "reason": "Only a 200,000-row sample with BENIGN and DDoS labels was found; full corpus was not located, official provenance is unverified, and three Flow Bytes/s values are missing."
+    },
+    "sqli": {
+      "status": "TRAINED_FOR_NUMERIC_FEATURE_SCHEMA_ONLY",
+      "reason": "A local grouped holdout evaluation was run on the 64,172-row Normal/Malicious dataset after excluding 136 rows from five contradictory feature-vector groups. Raw-query feature extraction is not verified; inference requires the original 26 numeric features and measured results do not establish external generalization.",
+      "evaluation": {
+        "estimator": "RandomForestClassifier",
+        "parameters": {
+          "n_estimators": 250,
+          "min_samples_leaf": 2,
+          "class_weight": "balanced_subsample",
+          "random_state": 42
+        },
+        "split_method": "GroupShuffleSplit by SHA-256 fingerprint of exact feature vectors",
+        "test_size": 0.2,
+        "train_rows": 51106,
+        "test_rows": 12930,
+        "threshold": 0.5,
+        "metrics": {
+          "accuracy": 0.9986852281515854,
+          "precision": 0.9980312376952356,
+          "recall": 0.9997370496976071,
+          "f1": 0.9988834154351396,
+          "roc_auc": 0.9999835038690835,
+          "average_precision": 0.9999883652770832,
+          "confusion_matrix_labels_0_1": [[5309, 15], [2, 7604]]
+        },
+        "artifact": "models/sqli_model.joblib (local, ignored by Git)"
+      }
+    },
+    "ton_iot_processed_members": {
+      "status": "CONDITIONALLY_READY_AS_SEPARATE_SCHEMA_SPECIFIC_DATASETS",
+      "reason": "All 20 available CSV payloads passed size and CRC32 checks and have binary labels; use each file's own schema. The source archive is not a valid standard ZIP and the available bundle is incomplete."
+    },
+    "lanl_flows_and_dns": {
+      "status": "NOT_READY_FOR_SUPERVISED_TRAINING",
+      "reason": "No label field is present in the observed records."
+    },
+    "lanl_redteam": {
+      "status": "NOT_READY_AS_A_STANDALONE_SUPERVISED_DATASET",
+      "reason": "Contains 749 red-team event annotations but no aligned benign rows or complete labeled examples."
+    },
+    "lanl_auth": {
+      "status": "FULL_STREAM_PROCESSED_GZIP_VALIDATED",
+      "reason": "The original gzip stream reached EOF and its trailer validated after resuming from a checkpoint. 1,051,430,459 records were read, all with valid nine-field width. Success/fail outcomes and a 300-second red-team association are summarized in artifacts/identity/auth_processing_summary.json. The legacy checkpoint lacked a red-team fingerprint; it was linked to the configured Downloads redteam file after verifying its path, 749 rows, and window, but the prior run's content fingerprint was unavailable. A transient checkpoint replacement error was logged and recovered."
+    },
+    "lanl_proc": {
+      "status": "SCHEMA_VALIDATED_LOADER_SUPPORTED",
+      "reason": "The local file is present and sample rows match the five-field schema; a full endpoint analysis or model has not been run."
+    }
+  }
+}
